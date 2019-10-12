@@ -42,7 +42,6 @@ public class PlayerController : MonoBehaviour
         if(collision.gameObject.tag == "GroundBlock")
         {
             sittingBlock = collision.gameObject;
-            Debug.Log(sittingBlock.GetComponent<GroundBlockController>().variant);
         }
         else if(collision.gameObject.tag == "Enemy")
         {
