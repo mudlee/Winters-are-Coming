@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
@@ -41,6 +42,10 @@ public class PlayerController : MonoBehaviour
         if(collision.gameObject.tag == "GroundBlock")
         {
             sittingBlock = collision.gameObject;
+        }
+        else if(collision.gameObject.tag == "Enemy")
+        {
+            SceneManager.LoadScene(2);
         }
     }
 

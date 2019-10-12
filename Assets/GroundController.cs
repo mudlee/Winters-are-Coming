@@ -1,15 +1,23 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class GroundController : MonoBehaviour
 {
-    const int MAP_SIZE = 50;
+    const int MAP_SIZE = 40;
     const int MAP_BLOCK_SPACING = 2;
-    [SerializeField] GameObject _groundParent = default;
+    [SerializeField] GameObject _walkableParent = default;
+    [SerializeField] GameObject _obstacleParent = default;
     [SerializeField] GameObject _groundBlockPrefab = default;
     [SerializeField] List<Variant> _variants = default;
     [SerializeField] Variant _defaultVariant = default;
     Dictionary<VariantType, List<GameObject>> _blocks = new Dictionary<VariantType, List<GameObject>>();
+
+    struct TeleportableBlock
+    {
+        public GameObject block;
+        public VariantType variantType;
+    }
 
     public GameObject GetRandomBlockByVariant(VariantType type)
     {
@@ -22,47 +30,59 @@ public class GroundController : MonoBehaviour
         return null;
     }
 
-    struct CreatedBlock
+    public List<GameObject> GetWalkableBlocks()
     {
-        public GameObject block;
-        public VariantType variantType;
+        List<GameObject> walkables = new List<GameObject>();
+
+        foreach(Transform walkable in _walkableParent.transform)
+        {
+            walkables.Add(walkable.gameObject);
+        }
+
+        return walkables;
     }
     
-    void Start()
+    public void BuildGround()
     {
         for(int x = 0; x < MAP_SIZE; x+=MAP_BLOCK_SPACING) 
         {
             for(int z = 0; z < MAP_SIZE; z+=MAP_BLOCK_SPACING)
             {
-                
-                Vector3 position = new Vector3(x,0,z);
-                CreatedBlock? groundBlock = CreateBlock(position, true);
-                
-                if(
-                    x==0 || z==0 || // left col and bottom row
+                bool obstacle = x==0 || z==0 || // left col and bottom row
                     x==MAP_SIZE-MAP_BLOCK_SPACING || z==MAP_SIZE-MAP_BLOCK_SPACING || // top row and right col
-                    (Random.value >= 0.8f && x!=MAP_BLOCK_SPACING && z!=MAP_BLOCK_SPACING)
-                ) {
+                    (Random.value >= 0.8f && x!=MAP_BLOCK_SPACING && z!=MAP_BLOCK_SPACING);
+
+                Vector3 position = new Vector3(x,0,z);
+                
+                
+                if(obstacle) {
                     position.y = 1;
                     CreateBlock(position, false);
                 }
-                else if(groundBlock.HasValue) 
+                else
                 {
-
-                    AddAsTeleportPoint(groundBlock.Value.variantType, groundBlock.Value.block);
+                    TeleportableBlock? teleportableBlock = CreateBlock(position, true);
+                    if(teleportableBlock.HasValue) 
+                    {
+                        AddAsTeleportPoint(teleportableBlock.Value.variantType, teleportableBlock.Value.block);
+                    }
                 }
             }
         }
+
+        NavMeshSurface navMeshSurface = _walkableParent.GetComponent<NavMeshSurface>();
+        navMeshSurface.collectObjects = CollectObjects.Children;
+        navMeshSurface.BuildNavMesh();
     }
 
-    CreatedBlock? CreateBlock(Vector3 at, bool attachVariant)
+    TeleportableBlock? CreateBlock(Vector3 at, bool walkable)
     {
         at.x+=0.1f;
         at.z+=0.1f;
         GameObject block = GameObject.Instantiate(_groundBlockPrefab, at, Quaternion.identity) as GameObject;
-        block.transform.parent = _groundParent.transform;
+        block.transform.parent = walkable ? _walkableParent.transform : _obstacleParent.transform;
 
-        if(attachVariant)
+        if(walkable)
         {
             Variant variant;
             if(Random.value >= 0.8f)
@@ -77,7 +97,7 @@ public class GroundController : MonoBehaviour
             block.GetComponent<Renderer>().material = variant.material;
             block.GetComponent<GroundBlockController>().variant = variant.type;
 
-            return new CreatedBlock{block = block, variantType = variant.type};
+            return new TeleportableBlock{block = block, variantType = variant.type};
         }
 
         return null;
