@@ -9,6 +9,7 @@ public class GameController : MonoBehaviour
     const float TELEPORT_LIMIT_SECS = 3f;
     PlayerController _player;
     GroundController _ground;
+    SoundPlayer _soundPlayer;
     int _enemyIndex=0;
     List<GameObject> _walkableBlocks;
     float _lastTeleport=0;
@@ -17,6 +18,7 @@ public class GameController : MonoBehaviour
     {
         _player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
         _ground = GetComponent<GroundController>();
+        _soundPlayer = GetComponent<SoundPlayer>();
 
         _ground.BuildGround();
 
@@ -29,16 +31,28 @@ public class GameController : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.Return))
         {
             bool sameColor = _player.currentVariant == _player.sittingBlock.GetComponent<GroundBlockController>().variant;
-            if(sameColor && (Time.time-_lastTeleport)>TELEPORT_LIMIT_SECS)
+            if(sameColor)
             {
-                Debug.Log("Teleporting...");
-                GameObject target = _ground.GetRandomBlockByVariant(_player.currentVariant);
-                _player.transform.position = new Vector3(
-                    target.transform.position.x,
-                    _player.transform.position.y,
-                    target.transform.position.z
-                );
-                _lastTeleport=Time.time;
+                if((Time.time-_lastTeleport)>TELEPORT_LIMIT_SECS)
+                {
+                    Debug.Log("Teleporting...");
+                    _soundPlayer.Play(SoundType.TELEPORT);
+                    GameObject target = _ground.GetRandomBlockByVariant(_player.currentVariant);
+                    _player.transform.position = new Vector3(
+                        target.transform.position.x,
+                        _player.transform.position.y,
+                        target.transform.position.z
+                    );
+                    _lastTeleport=Time.time;
+                }
+                else
+                {
+                    _soundPlayer.Play(SoundType.TELEPORT_REJECTED);
+                }
+            }
+            else
+            {
+                _soundPlayer.Play(SoundType.TELEPORT_REJECTED);
             }
         }
     }

@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8b73e62f1b7db8ed9dec776436f4957, type: 3}
+  m_Name: TeleportRejectedSound
+  m_EditorClassIdentifier: 
+  sound: 1
+  clip: {fileID: 8300000, guid: 0fb56ac815c3b96d2959f405786b5b5f, type: 3}
+  loop: 0
+  volume: 1
