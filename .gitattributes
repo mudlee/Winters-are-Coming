@@ -121,3 +121,4 @@
 *.unity             linguist-generated
 
 "Assets/TextMesh Pro/Resources/Shaders/*" linguist-vendored
+*.shader	linguist-language=C#
