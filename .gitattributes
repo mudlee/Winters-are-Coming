@@ -119,3 +119,5 @@
 *.meta              linguist-generated
 *.prefab            linguist-generated
 *.unity             linguist-generated
+
+"Assets/TextMesh Pro/Resources/Shaders/*" linguist-vendored
